@@ -9,7 +9,15 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const feedSize = 20
+const feedSize = 15
+
+// figlet -f big HTTPSDEV
+const logo = ` _    _ _______ _______ _____   _____ _____  ________      __
+| |  | |__   __|__   __|  __ \ / ____|  __ \|  ____\ \    / /
+| |__| |  | |     | |  | |__) | (___ | |  | | |__   \ \  / /
+|  __  |  | |     | |  |  ___/ \___ \| |  | |  __|   \ \/ /
+| |  | |  | |     | |  | |     ____) | |__| | |____   \  /
+|_|  |_|  |_|     |_|  |_|    |_____/|_____/|______|   \/    `
 
 type tickMsg time.Time
 type eventMsg Event
@@ -23,7 +31,7 @@ type model struct {
 	errors     int
 	totalDur   time.Duration
 	startedAt  time.Time
-	tab        int // 0 = requests, 1 = cert info
+	width      int
 }
 
 func initialModel(listenAddr, upstream string) model {
@@ -31,27 +39,29 @@ func initialModel(listenAddr, upstream string) model {
 		listenAddr: listenAddr,
 		upstream:   upstream,
 		startedAt:  time.Now(),
+		width:      100,
 	}
 }
 
 func (m model) Init() tea.Cmd { return tea.Batch(tick(), tea.EnterAltScreen) }
 
 func tick() tea.Cmd {
-	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg { return tickMsg(t) })
+	return tea.Tick(200*time.Millisecond, func(t time.Time) tea.Msg { return tickMsg(t) })
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "c":
 			m.feed = nil
-		case "1":
-			m.tab = 0
-		case "2":
-			m.tab = 1
+			m.total = 0
+			m.errors = 0
+			m.totalDur = 0
 		}
 	case tickMsg:
 		return m, tick()
@@ -74,76 +84,101 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // Catppuccin Mocha palette.
 var (
-	accent = lipgloss.Color("#cba6f7") // mauve — active/focus/title
-	muted  = lipgloss.Color("#6c7086") // overlay0 — dividers, labels, inactive
-	ok     = lipgloss.Color("#a6e3a1") // green — 2xx / good counts
-	warn   = lipgloss.Color("#fab387") // peach — 3xx
-	bad    = lipgloss.Color("#f38ba8") // red — 4xx/5xx / error counts
+	accent = lipgloss.Color("#cba6f7") // mauve
+	muted  = lipgloss.Color("#6c7086") // overlay0
+	ok     = lipgloss.Color("#a6e3a1") // green
+	warn   = lipgloss.Color("#fab387") // peach
+	bad    = lipgloss.Color("#f38ba8") // red
 
-	titleStyle  = lipgloss.NewStyle().Bold(true).Foreground(accent)
-	labelStyle  = lipgloss.NewStyle().Foreground(muted)
+	logoStyle   = lipgloss.NewStyle().Foreground(accent).Bold(true)
 	dimStyle    = lipgloss.NewStyle().Foreground(muted).Faint(true)
-	sectionHdr  = lipgloss.NewStyle().Foreground(accent).Bold(true)
-	borderStyle = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(muted).Padding(0, 1)
+	mutedStyle  = lipgloss.NewStyle().Foreground(muted)
+	accentStyle = lipgloss.NewStyle().Foreground(accent).Bold(true)
 	statOK      = lipgloss.NewStyle().Foreground(ok)
 	statBad     = lipgloss.NewStyle().Foreground(bad)
 	statWarn    = lipgloss.NewStyle().Foreground(warn)
-	tabActive   = lipgloss.NewStyle().Foreground(accent).Bold(true)
-	tabInactive = lipgloss.NewStyle().Foreground(muted)
-	chev        = lipgloss.NewStyle().Foreground(accent).Render("❯")
+	arrowStyle  = lipgloss.NewStyle().Foreground(muted)
+	chevStyle   = lipgloss.NewStyle().Foreground(accent).Bold(true)
 )
 
 func (m model) View() string {
+	w := m.width
+	if w < 80 {
+		w = 80
+	}
+
+	// 1. Wordmark centered + tagline
+	logoLines := strings.Split(logo, "\n")
+	logoWidth := 0
+	for _, l := range logoLines {
+		if lipgloss.Width(l) > logoWidth {
+			logoWidth = lipgloss.Width(l)
+		}
+	}
+	pad := (w - logoWidth) / 2
+	if pad < 0 {
+		pad = 0
+	}
+	padStr := strings.Repeat(" ", pad)
+	var logoBlock strings.Builder
+	for _, l := range logoLines {
+		logoBlock.WriteString(padStr + logoStyle.Render(l) + "\n")
+	}
+	tagline := "zero-config https for dev servers"
+	taglinePad := (w - len(tagline)) / 2
+	if taglinePad < 0 {
+		taglinePad = 0
+	}
+	logoBlock.WriteString(strings.Repeat(" ", taglinePad) + dimStyle.Render(tagline) + "\n")
+
+	// 2. Connection strip + cert info
+	connLine := "  " + accentStyle.Render("▶") + "  " +
+		accentStyle.Render("https://"+m.listenAddr) + "     " +
+		arrowStyle.Render("⇢") + "     " +
+		mutedStyle.Render(m.upstream)
+	certLine := "     " + dimStyle.Render("mkcert · valid 30d")
+
+	// 3. Live section header with inline stats + trailing rule
 	var avg time.Duration
 	if m.total > 0 {
 		avg = m.totalDur / time.Duration(m.total)
 	}
 	uptime := time.Since(m.startedAt).Round(time.Second)
-
-	header := chev + "  " + titleStyle.Render("httpsdev v"+Version) + "   " +
-		labelStyle.Render(m.listenAddr+"  →  "+m.upstream)
-
-	statsHdr := sectionHdr.Render("▲ live")
-	statsBox := borderStyle.Render(fmt.Sprintf(
-		"total  %d    errors  %s    avg  %s    uptime  %s",
+	statsText := fmt.Sprintf("%d req · %s err · %s avg · %s",
 		m.total,
 		colorInt(m.errors, m.errors == 0),
 		avg.Round(time.Millisecond),
 		uptime,
-	))
-
-	var mainHdr, mainBox string
-	switch m.tab {
-	case 0:
-		mainHdr = sectionHdr.Render("▲ requests")
-		mainBox = borderStyle.Render(m.renderFeed())
-	case 1:
-		mainHdr = sectionHdr.Render("▲ cert")
-		mainBox = borderStyle.Render(strings.Join([]string{
-			"cert     " + labelStyle.Render("mkcert-signed"),
-			"subject  " + labelStyle.Render("localhost"),
-			"valid    " + labelStyle.Render("30 days (rolling)"),
-			"",
-			dimStyle.Render("more introspection in v0.2"),
-		}, "\n"))
+	)
+	hdrPrefix := mutedStyle.Render("  ── ") + accentStyle.Render("live") + mutedStyle.Render(" ──────── ") + statsText + " "
+	hdrFill := w - lipgloss.Width(hdrPrefix) - 2
+	if hdrFill < 0 {
+		hdrFill = 0
 	}
+	sectionHdr := hdrPrefix + mutedStyle.Render(strings.Repeat("─", hdrFill))
 
-	tabs := []string{"1 requests", "2 cert"}
-	if m.tab == 0 {
-		tabs[0] = tabActive.Render(tabs[0])
-		tabs[1] = tabInactive.Render(tabs[1])
-	} else {
-		tabs[0] = tabInactive.Render(tabs[0])
-		tabs[1] = tabActive.Render(tabs[1])
-	}
-	footer := strings.Join(tabs, "   ") + labelStyle.Render("      q quit · c clear")
+	// 4. Request feed
+	feed := m.renderFeed()
 
-	return strings.Join([]string{"", header, "", statsHdr, statsBox, "", mainHdr, mainBox, "", footer}, "\n")
+	// 5. Bottom rule
+	bottomRule := "  " + mutedStyle.Render(strings.Repeat("─", w-4))
+
+	// 6. Keybar
+	keybar := "  " + dimStyle.Render("[c]") + mutedStyle.Render(" clear    ") +
+		dimStyle.Render("[q]") + mutedStyle.Render(" quit")
+
+	return "\n" + logoBlock.String() + "\n" +
+		connLine + "\n" +
+		certLine + "\n\n" +
+		sectionHdr + "\n\n" +
+		feed + "\n\n" +
+		bottomRule + "\n\n" +
+		keybar
 }
 
 func (m model) renderFeed() string {
 	if len(m.feed) == 0 {
-		return dimStyle.Render("waiting for requests…")
+		return "    " + dimStyle.Render("waiting for requests…")
 	}
 	var b strings.Builder
 	lastIdx := len(m.feed) - 1
@@ -157,23 +192,23 @@ func (m model) renderFeed() string {
 		case ev.Status >= 300:
 			s = statWarn
 		}
-		marker := "  "
+		marker := "    " + arrowStyle.Render("→") + " "
 		if i == lastIdx {
-			marker = chev + " "
+			marker = "    " + chevStyle.Render("❯") + " "
 		}
-		fmt.Fprintf(&b, "%s%-6s %-30s %s  %s\n",
+		fmt.Fprintf(&b, "%s%-6s %-36s %s   %s\n",
 			marker,
 			ev.Method,
-			truncate(ev.Path, 30),
+			truncate(ev.Path, 36),
 			s.Render(fmt.Sprintf("%d", ev.Status)),
-			labelStyle.Render(ev.Duration.Round(time.Millisecond).String()),
+			mutedStyle.Render(ev.Duration.Round(time.Millisecond).String()),
 		)
 	}
 	return strings.TrimRight(b.String(), "\n")
 }
 
-func colorInt(n int, ok bool) string {
-	if ok {
+func colorInt(n int, isOK bool) string {
+	if isOK {
 		return statOK.Render(fmt.Sprintf("%d", n))
 	}
 	return statBad.Render(fmt.Sprintf("%d", n))
