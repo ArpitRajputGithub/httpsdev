@@ -1,0 +1,17 @@
+# Binaries
+/httpsdev
+/dist/
+
+# Go
+*.test
+*.out
+vendor/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Local process docs — kept locally for reference, not shipped with the repo.
+docs/superpowers/
