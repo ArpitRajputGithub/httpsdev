@@ -54,3 +54,22 @@ func writeFile(t *testing.T, path, contents string) {
 		t.Fatal(err)
 	}
 }
+
+func TestCertCacheDir_UsesXDG(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", "/tmp/xdgtest")
+	got := certCacheDir()
+	want := "/tmp/xdgtest/httpsdev/certs"
+	if got != want {
+		t.Fatalf("got %q, want %q", got, want)
+	}
+}
+
+func TestCertCacheDir_FallsBackToHome(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", "")
+	t.Setenv("HOME", "/tmp/hometest")
+	got := certCacheDir()
+	want := "/tmp/hometest/.config/httpsdev/certs"
+	if got != want {
+		t.Fatalf("got %q, want %q", got, want)
+	}
+}
