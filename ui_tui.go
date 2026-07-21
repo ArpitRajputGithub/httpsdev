@@ -72,13 +72,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// Palette adapted from torlink (github.com/baairon/torlink).
+// Catppuccin Mocha palette.
 var (
-	accent = lipgloss.Color("#a78bfa") // violet — active/focus/title
-	muted  = lipgloss.Color("#6b6577") // purple-grey — dividers, labels, inactive
-	ok     = lipgloss.Color("#86d6a2") // soft green — 2xx / good counts
-	warn   = lipgloss.Color("#f0c674") // 3xx
-	bad    = lipgloss.Color("#e57373") // 4xx/5xx / error counts
+	accent = lipgloss.Color("#cba6f7") // mauve — active/focus/title
+	muted  = lipgloss.Color("#6c7086") // overlay0 — dividers, labels, inactive
+	ok     = lipgloss.Color("#a6e3a1") // green — 2xx / good counts
+	warn   = lipgloss.Color("#fab387") // peach — 3xx
+	bad    = lipgloss.Color("#f38ba8") // red — 4xx/5xx / error counts
 
 	titleStyle  = lipgloss.NewStyle().Bold(true).Foreground(accent)
 	labelStyle  = lipgloss.NewStyle().Foreground(muted)
