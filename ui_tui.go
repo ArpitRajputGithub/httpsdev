@@ -11,13 +11,14 @@ import (
 
 const feedSize = 15
 
-// figlet -f big HTTPSDEV
-const logo = ` _    _ _______ _______ _____   _____ _____  ________      __
-| |  | |__   __|__   __|  __ \ / ____|  __ \|  ____\ \    / /
-| |__| |  | |     | |  | |__) | (___ | |  | | |__   \ \  / /
-|  __  |  | |     | |  |  ___/ \___ \| |  | |  __|   \ \/ /
-| |  | |  | |     | |  | |     ____) | |__| | |____   \  /
-|_|  |_|  |_|     |_|  |_|    |_____/|_____/|______|   \/    `
+// toilet -f mono12 HTTPSDEV
+const logo = ` ▄▄    ▄▄  ▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄      ▄▄▄▄    ▄▄▄▄▄     ▄▄▄▄▄▄▄▄  ▄▄    ▄▄
+ ██    ██  ▀▀▀██▀▀▀  ▀▀▀██▀▀▀  ██▀▀▀▀█▄  ▄█▀▀▀▀█   ██▀▀▀██   ██▀▀▀▀▀▀  ▀██  ██▀
+ ██    ██     ██        ██     ██    ██  ██▄       ██    ██  ██         ██  ██
+ ████████     ██        ██     ██████▀    ▀████▄   ██    ██  ███████    ██  ██
+ ██    ██     ██        ██     ██             ▀██  ██    ██  ██          ████
+ ██    ██     ██        ██     ██        █▄▄▄▄▄█▀  ██▄▄▄██   ██▄▄▄▄▄▄    ████
+ ▀▀    ▀▀     ▀▀        ▀▀     ▀▀         ▀▀▀▀▀    ▀▀▀▀▀     ▀▀▀▀▀▀▀▀    ▀▀▀▀`
 
 type tickMsg time.Time
 type eventMsg Event
@@ -124,7 +125,7 @@ func (m model) View() string {
 	for _, l := range logoLines {
 		logoBlock.WriteString(padStr + logoStyle.Render(l) + "\n")
 	}
-	tagline := "zero-config https for dev servers"
+	tagline := "Real browser-trusted HTTPS for any local dev server."
 	taglinePad := (w - len(tagline)) / 2
 	if taglinePad < 0 {
 		taglinePad = 0
