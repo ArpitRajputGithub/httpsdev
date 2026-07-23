@@ -1,0 +1,376 @@
+---
+import "../styles/global.css";
+
+const wordmark = ` ▄▄    ▄▄  ▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄      ▄▄▄▄    ▄▄▄▄▄     ▄▄▄▄▄▄▄▄  ▄▄    ▄▄
+ ██    ██  ▀▀▀██▀▀▀  ▀▀▀██▀▀▀  ██▀▀▀▀█▄  ▄█▀▀▀▀█   ██▀▀▀██   ██▀▀▀▀▀▀  ▀██  ██▀
+ ██    ██     ██        ██     ██    ██  ██▄       ██    ██  ██         ██  ██
+ ████████     ██        ██     ██████▀    ▀████▄   ██    ██  ███████    ██  ██
+ ██    ██     ██        ██     ██             ▀██  ██    ██  ██          ████
+ ██    ██     ██        ██     ██        █▄▄▄▄▄█▀  ██▄▄▄██   ██▄▄▄▄▄▄    ████
+ ▀▀    ▀▀     ▀▀        ▀▀     ▀▀         ▀▀▀▀▀    ▀▀▀▀▀     ▀▀▀▀▀▀▀▀    ▀▀▀▀`;
+
+const installCmd = "go install github.com/ArpitRajputGithub/httpsdev@latest";
+const repo = "https://github.com/ArpitRajputGithub/httpsdev";
+
+const features = [
+  {
+    title: "No self-signed drama",
+    body: "Certs come from mkcert — the same local CA Chrome and Safari already trust. Zero warnings. Zero “Advanced → Proceed anyway” clicking.",
+  },
+  {
+    title: "No framework-specific config",
+    body: "No --https flag to remember. No HTTPS=true env var. No experimental Next config. Point at a port and go.",
+  },
+  {
+    title: "HMR still works",
+    body: "WebSocket upgrades and SSE forward untouched. Your Vite HMR, Next dev overlay, Rails Turbo streams — everything keeps working.",
+  },
+  {
+    title: "One binary, no runtime",
+    body: "10 MB static Go binary. No node_modules. No Python venv. No Docker. go install and you're done.",
+  },
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>httpsdev — Real HTTPS for any local dev server</title>
+    <meta
+      name="description"
+      content="Zero-config HTTPS wrapper for local dev servers. Real browser-trusted certs via mkcert. Works with Vite, Next, Rails, Django — any HTTP dev server."
+    />
+    <meta property="og:title" content="httpsdev — Real HTTPS for any local dev server" />
+    <meta
+      property="og:description"
+      content="Zero-config HTTPS wrapper for local dev servers. Real browser-trusted certs via mkcert. Works with any HTTP dev server."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!--
+      GoatCounter analytics (privacy-friendly, cookie-free).
+      Sign up at goatcounter.com, create a site named "httpsdev",
+      then replace the code below with your site code (the subdomain).
+      Comment out or delete these lines to disable analytics.
+    -->
+    <script
+      data-goatcounter="https://YOUR-CODE.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
+  </head>
+  <body class="antialiased">
+    <!-- Nav -->
+    <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
+      <a
+        href="/"
+        class="flex items-center gap-2 text-sm font-semibold tracking-wider text-[color:var(--color-accent)]"
+      >
+        <span aria-hidden="true">▶</span>
+        <span>httpsdev</span>
+      </a>
+      <nav class="flex items-center gap-6 text-sm text-[color:var(--color-muted)]">
+        <a href="#install" class="hover:text-[color:var(--color-text)]">install</a>
+        <a href="#features" class="hover:text-[color:var(--color-text)]">features</a>
+        <a
+          href={repo}
+          class="rounded-md border border-[color:var(--color-subtle)] px-3 py-1.5 hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-text)]"
+        >
+          github ★
+        </a>
+      </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="mx-auto flex w-full max-w-6xl flex-col items-center px-6 pt-16 pb-20 text-center">
+      <pre
+        class="wordmark-anim mx-auto w-full max-w-[900px] overflow-x-auto text-[8px] leading-[1.05] text-[color:var(--color-accent)] sm:text-[10px] md:text-[13px] lg:text-[15px]"
+        aria-label="HTTPSDEV"
+      >{wordmark}</pre>
+
+      <p class="mt-6 text-sm text-[color:var(--color-muted)] sm:text-base">
+        Point it at a port. Get a green padlock.
+      </p>
+
+      <h1
+        class="mt-12 max-w-3xl text-2xl leading-tight text-[color:var(--color-text)] sm:text-3xl md:text-4xl"
+      >
+        Localhost with a<br />working padlock.
+      </h1>
+      <p
+        class="mt-6 max-w-2xl text-sm leading-relaxed text-[color:var(--color-muted)] sm:text-base"
+      >
+        Every framework has its own broken HTTPS story. Some ship self-signed certs that trip the
+        browser. Some hide it behind an <code class="text-[color:var(--color-text)]">HTTPS=true</code> env var. Some just don't.
+        <span class="text-[color:var(--color-text)]">httpsdev</span> sits in front of any dev server and gives it a real, browser-trusted cert.
+      </p>
+      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--color-muted)] sm:text-base">
+        Vite, Next, Rails, Django, plain HTTP — if it speaks HTTP, this wraps it. WebSockets and
+        SSE pass through untouched. HMR keeps working. No plugins, no configs, no <code class="text-[color:var(--color-text)]">--insecure</code>.
+      </p>
+
+      <!-- Install command -->
+      <div class="mt-10 w-full max-w-2xl">
+        <p class="mb-2 text-left text-xs text-[color:var(--color-muted)]">
+          Install
+        </p>
+        <div
+          class="flex items-center justify-between rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-left"
+        >
+          <code
+            class="truncate text-sm text-[color:var(--color-text)] sm:text-base"
+            id="install-cmd">$ {installCmd}<span
+              class="cursor-blink ml-1 text-[color:var(--color-accent)]"
+              aria-hidden="true">▊</span></code
+          >
+          <button
+            id="copy-btn"
+            class="ml-4 shrink-0 rounded-md border border-[color:var(--color-subtle)] px-3 py-1 text-xs text-[color:var(--color-muted)] transition hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-accent)]"
+            data-copy={installCmd}
+            aria-label="Copy install command"
+          >
+            copy
+          </button>
+        </div>
+        <p class="mt-2 text-left text-xs text-[color:var(--color-muted)]">
+          Needs <a
+            href="https://github.com/FiloSottile/mkcert"
+            class="text-[color:var(--color-text)] underline decoration-[color:var(--color-subtle)] hover:decoration-[color:var(--color-accent)]"
+            >mkcert</a
+          > once — <code
+            class="text-[color:var(--color-text)]">brew install mkcert && mkcert -install</code
+          >. That's the only setup.
+        </p>
+      </div>
+    </section>
+
+    <!-- Fake live TUI — swap for <img src="/demo.gif" /> once VHS renders. -->
+    <section class="mx-auto w-full max-w-6xl px-6 pb-24">
+      <div
+        class="overflow-hidden rounded-xl border border-[color:var(--color-subtle)] bg-[color:var(--color-bg)] shadow-[0_0_60px_rgba(203,166,247,0.08)]"
+      >
+        <!-- Terminal chrome -->
+        <div class="flex items-center gap-2 border-b border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3">
+          <span class="h-3 w-3 rounded-full bg-[color:var(--color-bad)]"></span>
+          <span class="h-3 w-3 rounded-full bg-[color:var(--color-warn)]"></span>
+          <span class="h-3 w-3 rounded-full bg-[color:var(--color-ok)]"></span>
+          <span class="ml-4 text-xs text-[color:var(--color-muted)]">httpsdev --tui 5173</span>
+        </div>
+
+        <!-- TUI body -->
+        <div class="px-6 py-8 sm:px-10 sm:py-12">
+          <pre
+            class="mx-auto overflow-x-auto text-center text-[6px] leading-[1.05] text-[color:var(--color-accent)] sm:text-[8px] md:text-[10px]"
+            aria-label="HTTPSDEV"
+          >{wordmark}</pre>
+          <p class="mt-3 text-center text-xs text-[color:var(--color-muted)]">
+            Real browser-trusted HTTPS for any local dev server.
+          </p>
+
+          <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            <span class="text-[color:var(--color-accent)]">▶</span>
+            <span class="font-semibold text-[color:var(--color-accent)]">https://localhost:3443</span>
+            <span class="text-[color:var(--color-muted)]">⇢</span>
+            <span class="text-[color:var(--color-muted)]">http://localhost:5173</span>
+          </div>
+          <p class="mt-1 text-xs text-[color:var(--color-muted)]/60">mkcert · valid 30d</p>
+
+          <div class="mt-8 flex flex-wrap items-center gap-2 whitespace-nowrap text-sm">
+            <span class="text-[color:var(--color-muted)]">── </span>
+            <span class="font-bold text-[color:var(--color-accent)]">live</span>
+            <span class="text-[color:var(--color-muted)]"> ────────</span>
+            <span class="text-[color:var(--color-text)]">6 req</span>
+            <span class="text-[color:var(--color-muted)]">·</span>
+            <span class="text-[color:var(--color-ok)]">0</span>
+            <span class="text-[color:var(--color-text)]">err</span>
+            <span class="text-[color:var(--color-muted)]">·</span>
+            <span class="text-[color:var(--color-text)]">3ms avg</span>
+            <span class="text-[color:var(--color-muted)]">·</span>
+            <span class="text-[color:var(--color-text)]">12s</span>
+            <span class="hidden text-[color:var(--color-muted)] sm:inline"> ─────────────────</span>
+          </div>
+
+          <div class="mt-4 space-y-1 text-sm">
+            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
+              <span class="text-[color:var(--color-muted)]">→</span>
+              <span>GET</span>
+              <span class="truncate">/</span>
+              <span class="text-[color:var(--color-ok)]">200</span>
+              <span class="text-[color:var(--color-muted)]">6ms</span>
+            </div>
+            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
+              <span class="text-[color:var(--color-muted)]">→</span>
+              <span>GET</span>
+              <span class="truncate">/@vite/client</span>
+              <span class="text-[color:var(--color-ok)]">200</span>
+              <span class="text-[color:var(--color-muted)]">3ms</span>
+            </div>
+            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
+              <span class="text-[color:var(--color-muted)]">→</span>
+              <span>GET</span>
+              <span class="truncate">/favicon.ico</span>
+              <span class="text-[color:var(--color-bad)]">404</span>
+              <span class="text-[color:var(--color-muted)]">5ms</span>
+            </div>
+            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
+              <span class="text-[color:var(--color-muted)]">→</span>
+              <span>POST</span>
+              <span class="truncate">/api/login</span>
+              <span class="text-[color:var(--color-bad)]">401</span>
+              <span class="text-[color:var(--color-muted)]">45ms</span>
+            </div>
+            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
+              <span class="text-[color:var(--color-muted)]">→</span>
+              <span>GET</span>
+              <span class="truncate">/src/App.tsx</span>
+              <span class="text-[color:var(--color-ok)]">200</span>
+              <span class="text-[color:var(--color-muted)]">2ms</span>
+            </div>
+            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
+              <span class="tui-chev font-bold text-[color:var(--color-accent)]">❯</span>
+              <span>GET</span>
+              <span class="truncate">/api/session</span>
+              <span class="text-[color:var(--color-ok)]">200</span>
+              <span class="text-[color:var(--color-muted)]">1ms</span>
+            </div>
+          </div>
+
+          <div class="mt-6 text-[color:var(--color-muted)]">─────────────────────────────────────────────</div>
+          <div class="mt-4 flex gap-6 text-sm text-[color:var(--color-muted)]">
+            <span><span class="text-[color:var(--color-muted)]/70">[c]</span> clear</span>
+            <span><span class="text-[color:var(--color-muted)]/70">[q]</span> quit</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="mx-auto w-full max-w-6xl px-6 pb-24">
+      <p class="mb-8 text-xs uppercase tracking-[0.2em] text-[color:var(--color-accent)]">
+        ── the pitch, in four lines
+      </p>
+      <div class="grid gap-6 sm:grid-cols-2">
+        {
+          features.map((f) => (
+            <div class="reveal rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] p-6 transition hover:border-[color:var(--color-accent)]/40">
+              <h3 class="mb-3 text-base font-semibold text-[color:var(--color-accent)]">
+                {f.title}
+              </h3>
+              <p class="text-sm leading-relaxed text-[color:var(--color-muted)]">{f.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Install & Run -->
+    <section id="install" class="mx-auto w-full max-w-6xl px-6 pb-24">
+      <p class="mb-8 text-xs uppercase tracking-[0.2em] text-[color:var(--color-accent)]">
+        ── two commands, then you're done
+      </p>
+      <div class="space-y-6">
+        <div>
+          <p class="mb-2 text-sm text-[color:var(--color-muted)]">
+            1. Once, ever: get mkcert and trust its local CA.
+          </p>
+          <pre
+            class="overflow-x-auto rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:var(--color-text)]"><code>brew install mkcert
+mkcert -install</code></pre>
+        </div>
+        <div>
+          <p class="mb-2 text-sm text-[color:var(--color-muted)]">2. Grab httpsdev.</p>
+          <pre
+            class="overflow-x-auto rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:var(--color-text)]"><code>go install github.com/ArpitRajputGithub/httpsdev@latest</code></pre>
+          <p class="mt-2 text-xs text-[color:var(--color-muted)]">
+            Or grab a prebuilt binary from
+            <a
+              href={`${repo}/releases`}
+              class="text-[color:var(--color-text)] underline decoration-[color:var(--color-subtle)] hover:decoration-[color:var(--color-accent)]"
+              >releases</a
+            >.
+          </p>
+        </div>
+        <div>
+          <p class="mb-2 text-sm text-[color:var(--color-muted)]">
+            3. Point it at a port. Open the browser.
+          </p>
+          <pre
+            class="overflow-x-auto rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:var(--color-text)]"><code># in one terminal
+npm run dev            <span class="text-[color:var(--color-muted)]"># or vite, next dev, rails s, python -m http.server 5173, …</span>
+
+# in another
+httpsdev 5173          <span class="text-[color:var(--color-muted)]"># https://localhost:3443  →  http://localhost:5173</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="mx-auto w-full max-w-6xl px-6 pb-24 text-center">
+      <a
+        href={repo}
+        class="inline-flex items-center gap-3 rounded-lg border border-[color:var(--color-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--color-accent)] transition hover:bg-[color:var(--color-accent)] hover:text-[color:var(--color-bg)]"
+      >
+        <span>Star on GitHub</span>
+        <span aria-hidden="true">★</span>
+      </a>
+    </section>
+
+    <!-- Footer -->
+    <footer
+      class="mx-auto w-full max-w-6xl border-t border-[color:var(--color-subtle)] px-6 py-8 text-xs text-[color:var(--color-muted)]"
+    >
+      <div class="flex flex-col items-center justify-between gap-2 sm:flex-row">
+        <p>MIT · Go + bubbletea · because HTTPS shouldn't be this hard.</p>
+        <div class="flex gap-6">
+          <a href={repo} class="hover:text-[color:var(--color-text)]">github</a>
+          <a href={`${repo}/releases`} class="hover:text-[color:var(--color-text)]">releases</a>
+          <a href={`${repo}/issues`} class="hover:text-[color:var(--color-text)]">issues</a>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Copy button
+      const btn = document.getElementById("copy-btn");
+      if (btn) {
+        btn.addEventListener("click", async () => {
+          const cmd = btn.getAttribute("data-copy") || "";
+          try {
+            await navigator.clipboard.writeText(cmd);
+            const prev = btn.textContent;
+            btn.textContent = "copied ✓";
+            btn.classList.add("text-[color:var(--color-ok)]");
+            setTimeout(() => {
+              btn.textContent = prev;
+              btn.classList.remove("text-[color:var(--color-ok)]");
+            }, 1500);
+          } catch (e) {
+            btn.textContent = "err";
+          }
+        });
+      }
+
+      // Fade-in on scroll
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.15 }
+      );
+      document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>
