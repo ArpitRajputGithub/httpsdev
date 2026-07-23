@@ -15,3 +15,4 @@ vendor/
 
 # Local process docs — kept locally for reference, not shipped with the repo.
 docs/superpowers/
+CLAUDE.md
