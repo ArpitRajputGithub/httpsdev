@@ -14,21 +14,34 @@ const repo = "https://github.com/ArpitRajputGithub/httpsdev";
 
 const features = [
   {
+    icon: "ti-shield-check",
     title: "No self-signed drama",
     body: "Certs come from mkcert — the same local CA Chrome and Safari already trust. Zero warnings. Zero “Advanced → Proceed anyway” clicking.",
   },
   {
+    icon: "ti-settings-2",
     title: "No framework-specific config",
     body: "No --https flag to remember. No HTTPS=true env var. No experimental Next config. Point at a port and go.",
   },
   {
+    icon: "ti-bolt",
     title: "HMR still works",
     body: "WebSocket upgrades and SSE forward untouched. Your Vite HMR, Next dev overlay, Rails Turbo streams — everything keeps working.",
   },
   {
+    icon: "ti-cpu",
     title: "One binary, no runtime",
     body: "10 MB static Go binary. No node_modules. No Python venv. No Docker. go install and you're done.",
   },
+];
+
+const requests = [
+  { method: "GET", path: "/", status: "200", ms: "6ms", ok: true },
+  { method: "GET", path: "/@vite/client", status: "200", ms: "3ms", ok: true },
+  { method: "GET", path: "/favicon.ico", status: "404", ms: "5ms", ok: false },
+  { method: "POST", path: "/api/login", status: "401", ms: "45ms", ok: false },
+  { method: "GET", path: "/src/App.tsx", status: "200", ms: "2ms", ok: true },
+  { method: "GET", path: "/api/session", status: "200", ms: "1ms", ok: true },
 ];
 ---
 
@@ -52,7 +65,11 @@ const features = [
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css"
       rel="stylesheet"
     />
     <!--
@@ -68,297 +85,312 @@ const features = [
     ></script>
   </head>
   <body class="antialiased">
-    <!-- Nav -->
-    <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-      <a
-        href="/"
-        class="flex items-center gap-2 text-sm font-semibold tracking-wider text-[color:var(--color-accent)]"
+    <div class="mx-auto w-full max-w-[1440px] lg:grid lg:grid-cols-[300px_minmax(0,1fr)]">
+      <!-- Sidebar / top bar -->
+      <header
+        class="flex items-center justify-between gap-4 border-b border-subtle px-6 py-5 lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:items-stretch lg:justify-start lg:border-b-0 lg:border-r lg:px-8 lg:py-10"
       >
-        <span aria-hidden="true">▶</span>
-        <span>httpsdev</span>
-      </a>
-      <nav class="flex items-center gap-6 text-sm text-[color:var(--color-muted)]">
-        <a href="#install" class="hover:text-[color:var(--color-text)]">install</a>
-        <a href="#features" class="hover:text-[color:var(--color-text)]">features</a>
-        <a
-          href={repo}
-          class="rounded-md border border-[color:var(--color-subtle)] px-3 py-1.5 hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-text)]"
-        >
-          github ★
+        <a href="/" class="flex items-center gap-2 font-mono text-sm font-semibold tracking-wider text-accent">
+          <span aria-hidden="true">▶</span>
+          <span>httpsdev</span>
         </a>
-      </nav>
-    </header>
 
-    <!-- Hero -->
-    <section class="mx-auto flex w-full max-w-6xl flex-col items-center px-6 pt-16 pb-20 text-center">
-      <pre
-        class="wordmark-anim mx-auto w-full max-w-[900px] overflow-x-auto text-[8px] leading-[1.05] text-[color:var(--color-accent)] sm:text-[10px] md:text-[13px] lg:text-[15px]"
-        aria-label="HTTPSDEV"
-      >{wordmark}</pre>
-
-      <p class="mt-6 text-sm text-[color:var(--color-muted)] sm:text-base">
-        Point it at a port. Get a green padlock.
-      </p>
-
-      <h1
-        class="mt-12 max-w-3xl text-2xl leading-tight text-[color:var(--color-text)] sm:text-3xl md:text-4xl"
-      >
-        Localhost with a<br />working padlock.
-      </h1>
-      <p
-        class="mt-6 max-w-2xl text-sm leading-relaxed text-[color:var(--color-muted)] sm:text-base"
-      >
-        Every framework has its own broken HTTPS story. Some ship self-signed certs that trip the
-        browser. Some hide it behind an <code class="text-[color:var(--color-text)]">HTTPS=true</code> env var. Some just don't.
-        <span class="text-[color:var(--color-text)]">httpsdev</span> sits in front of any dev server and gives it a real, browser-trusted cert.
-      </p>
-      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--color-muted)] sm:text-base">
-        Vite, Next, Rails, Django, plain HTTP — if it speaks HTTP, this wraps it. WebSockets and
-        SSE pass through untouched. HMR keeps working. No plugins, no configs, no <code class="text-[color:var(--color-text)]">--insecure</code>.
-      </p>
-
-      <!-- Install command -->
-      <div class="mt-10 w-full max-w-2xl">
-        <p class="mb-2 text-left text-xs text-[color:var(--color-muted)]">
-          Install
-        </p>
-        <div
-          class="flex items-center justify-between rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-left"
-        >
-          <code
-            class="truncate text-sm text-[color:var(--color-text)] sm:text-base"
-            id="install-cmd">$ {installCmd}<span
-              class="cursor-blink ml-1 text-[color:var(--color-accent)]"
-              aria-hidden="true">▊</span></code
+        <!-- Mobile nav: compact links + icon-only repo button -->
+        <nav class="flex items-center gap-5 text-xs text-muted lg:hidden" aria-label="Primary">
+          <a href="#install" class="hover:text-text">install</a>
+          <a href="#features" class="hover:text-text">features</a>
+          <a
+            href={repo}
+            class="flex h-8 w-8 items-center justify-center rounded-md border border-subtle text-muted transition hover:border-accent hover:text-accent"
+            aria-label="Star httpsdev on GitHub"
           >
-          <button
-            id="copy-btn"
-            class="ml-4 shrink-0 rounded-md border border-[color:var(--color-subtle)] px-3 py-1 text-xs text-[color:var(--color-muted)] transition hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-accent)]"
-            data-copy={installCmd}
-            aria-label="Copy install command"
+            <i class="ti ti-star text-base" aria-hidden="true"></i>
+          </a>
+        </nav>
+
+        <!-- Desktop sidebar nav -->
+        <nav class="mt-14 hidden flex-col gap-1 font-sans text-sm lg:flex" aria-label="Primary">
+          <a
+            href="#install"
+            class="-mx-3 rounded-md px-3 py-2 text-muted transition hover:bg-surface hover:text-text"
+            >Install</a
           >
-            copy
-          </button>
-        </div>
-        <p class="mt-2 text-left text-xs text-[color:var(--color-muted)]">
-          Needs <a
-            href="https://github.com/FiloSottile/mkcert"
-            class="text-[color:var(--color-text)] underline decoration-[color:var(--color-subtle)] hover:decoration-[color:var(--color-accent)]"
-            >mkcert</a
-          > once — <code
-            class="text-[color:var(--color-text)]">brew install mkcert && mkcert -install</code
-          >. That's the only setup.
+          <a
+            href="#features"
+            class="-mx-3 rounded-md px-3 py-2 text-muted transition hover:bg-surface hover:text-text"
+            >Features</a
+          >
+          <a
+            href={repo}
+            class="mt-4 inline-flex w-fit items-center gap-2 rounded-md border border-subtle px-3 py-1.5 text-muted transition hover:border-accent hover:text-accent"
+          >
+            <span>github</span>
+            <span aria-hidden="true">★</span>
+          </a>
+        </nav>
+
+        <p class="mt-auto hidden pt-10 font-mono text-xs leading-relaxed text-dim lg:block">
+          MIT · Go + bubbletea<br />
+          by <a href="https://arpitrajput.xyz" class="underline decoration-subtle underline-offset-2 hover:text-text">Arpit Rajput</a>
         </p>
-      </div>
-    </section>
+      </header>
 
-    <!-- Fake live TUI — swap for <img src="/demo.gif" /> once VHS renders. -->
-    <section class="mx-auto w-full max-w-6xl px-6 pb-24">
-      <div
-        class="overflow-hidden rounded-xl border border-[color:var(--color-subtle)] bg-[color:var(--color-bg)] shadow-[0_0_60px_rgba(203,166,247,0.08)]"
-      >
-        <!-- Terminal chrome -->
-        <div class="flex items-center gap-2 border-b border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3">
-          <span class="h-3 w-3 rounded-full bg-[color:var(--color-bad)]"></span>
-          <span class="h-3 w-3 rounded-full bg-[color:var(--color-warn)]"></span>
-          <span class="h-3 w-3 rounded-full bg-[color:var(--color-ok)]"></span>
-          <span class="ml-4 text-xs text-[color:var(--color-muted)]">httpsdev --tui 5173</span>
-        </div>
-
-        <!-- TUI body -->
-        <div class="px-6 py-8 sm:px-10 sm:py-12">
+      <!-- Scrolling document column -->
+      <main class="px-6 sm:px-10 lg:px-14 xl:px-20">
+        <!-- Hero -->
+        <section class="pb-20 pt-12 lg:pt-20">
           <pre
-            class="mx-auto overflow-x-auto text-center text-[6px] leading-[1.05] text-[color:var(--color-accent)] sm:text-[8px] md:text-[10px]"
+            class="wordmark-anim w-full overflow-x-auto text-[8px] leading-[1.05] text-accent sm:text-[10px] lg:text-[11px] xl:text-[13px]"
             aria-label="HTTPSDEV"
           >{wordmark}</pre>
-          <p class="mt-3 text-center text-xs text-[color:var(--color-muted)]">
-            Real browser-trusted HTTPS for any local dev server.
+
+          <h1
+            class="mt-10 max-w-2xl font-sans text-4xl font-semibold leading-[1.05] tracking-tight text-text sm:text-5xl lg:text-6xl"
+          >
+            Localhost with a<br />working padlock.
+          </h1>
+          <p class="mt-6 font-sans text-lg text-text sm:text-xl">
+            Point it at a port. Get a green padlock.
+          </p>
+          <p class="mt-6 max-w-xl font-sans text-sm leading-relaxed text-muted sm:text-base">
+            Every framework has its own broken HTTPS story. Some ship self-signed certs that trip the
+            browser. Some hide it behind an <code class="text-text">HTTPS=true</code> env var. Some just don't.
+            <span class="text-text">httpsdev</span> sits in front of any dev server and gives it a real, browser-trusted cert.
+          </p>
+          <p class="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted sm:text-base">
+            Vite, Next, Rails, Django, plain HTTP — if it speaks HTTP, this wraps it. WebSockets and
+            SSE pass through untouched. HMR keeps working. No plugins, no configs, no <code class="text-text">--insecure</code>.
           </p>
 
-          <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            <span class="text-[color:var(--color-accent)]">▶</span>
-            <span class="font-semibold text-[color:var(--color-accent)]">https://localhost:3443</span>
-            <span class="text-[color:var(--color-muted)]">⇢</span>
-            <span class="text-[color:var(--color-muted)]">http://localhost:5173</span>
+          <!-- Install command -->
+          <div class="mt-12 max-w-2xl">
+            <p class="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-dim">Install</p>
+            <div
+              class="flex items-center gap-3 border-b border-subtle pb-3 transition focus-within:border-text"
+            >
+              <span class="select-none font-mono text-dim" aria-hidden="true">$</span>
+              <code
+                class="overflow-x-auto whitespace-nowrap font-mono text-sm text-text sm:text-base"
+                id="install-cmd">{installCmd}<span
+                  class="cursor-blink ml-1 text-accent"
+                  aria-hidden="true">▊</span></code
+              >
+              <button
+                id="copy-btn"
+                class="ml-auto shrink-0 rounded-md p-1.5 text-muted transition hover:text-accent"
+                data-copy={installCmd}
+                aria-label="Copy install command"
+              >
+                <i class="ti ti-clipboard-copy text-lg" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p class="mt-3 font-sans text-xs leading-relaxed text-muted">
+              Needs <a
+                href="https://github.com/FiloSottile/mkcert"
+                class="text-text underline decoration-subtle underline-offset-2 hover:decoration-accent"
+                >mkcert</a
+              > once — <code class="text-text">brew install mkcert && mkcert -install</code>.
+              That's the only setup.
+            </p>
           </div>
-          <p class="mt-1 text-xs text-[color:var(--color-muted)]/60">mkcert · valid 30d</p>
+        </section>
 
-          <div class="mt-8 flex flex-wrap items-center gap-2 whitespace-nowrap text-sm">
-            <span class="text-[color:var(--color-muted)]">── </span>
-            <span class="font-bold text-[color:var(--color-accent)]">live</span>
-            <span class="text-[color:var(--color-muted)]"> ────────</span>
-            <span class="text-[color:var(--color-text)]">6 req</span>
-            <span class="text-[color:var(--color-muted)]">·</span>
-            <span class="text-[color:var(--color-ok)]">0</span>
-            <span class="text-[color:var(--color-text)]">err</span>
-            <span class="text-[color:var(--color-muted)]">·</span>
-            <span class="text-[color:var(--color-text)]">3ms avg</span>
-            <span class="text-[color:var(--color-muted)]">·</span>
-            <span class="text-[color:var(--color-text)]">12s</span>
-            <span class="hidden text-[color:var(--color-muted)] sm:inline"> ─────────────────</span>
+        <!-- Product proof: static terminal window -->
+        <section class="pb-24">
+          <div
+            class="reveal overflow-hidden rounded-xl border border-subtle bg-bg shadow-[0_24px_60px_rgba(0,0,0,0.35)]"
+          >
+            <!-- Terminal chrome -->
+            <div class="flex items-center gap-2 border-b border-subtle bg-surface px-4 py-3">
+              <span class="h-3 w-3 rounded-full bg-bad"></span>
+              <span class="h-3 w-3 rounded-full bg-warn"></span>
+              <span class="h-3 w-3 rounded-full bg-ok"></span>
+              <span class="ml-4 font-mono text-xs text-dim">httpsdev --tui 5173</span>
+            </div>
+
+            <!-- Request feed -->
+            <div class="px-6 py-8 sm:px-10">
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-sm">
+                <span class="text-accent" aria-hidden="true">▶</span>
+                <span class="font-semibold text-text">https://localhost:3443</span>
+                <span class="text-dim" aria-hidden="true">⇢</span>
+                <span class="text-muted">http://localhost:5173</span>
+              </div>
+              <p class="mt-1 font-mono text-xs text-dim">mkcert · valid 30d</p>
+
+              <div class="mt-8 flex flex-wrap items-center gap-2 whitespace-nowrap font-mono text-sm">
+                <span class="text-dim" aria-hidden="true">──</span>
+                <span class="font-bold text-text">live</span>
+                <span class="text-dim" aria-hidden="true">────────</span>
+                <span class="text-text">6 req</span>
+                <span class="text-dim">·</span>
+                <span class="text-ok">0</span>
+                <span class="text-text">err</span>
+                <span class="text-dim">·</span>
+                <span class="text-text">3ms avg</span>
+                <span class="text-dim">·</span>
+                <span class="text-text">12s</span>
+              </div>
+
+              <div class="mt-4 overflow-x-auto">
+                <div class="min-w-[26rem] space-y-1 font-mono text-sm">
+                  {
+                    requests.map((r) => (
+                      <div class="grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
+                        <span class="text-dim" aria-hidden="true">→</span>
+                        <span class="text-text">{r.method}</span>
+                        <span class="truncate text-text">{r.path}</span>
+                        <span class={r.ok ? "text-ok" : "text-bad"}>{r.status}</span>
+                        <span class="text-dim">{r.ms}</span>
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+
+              <div class="mt-6 font-mono text-subtle" aria-hidden="true">─────────────────────────────────────────────</div>
+              <div class="mt-4 flex gap-6 font-mono text-sm text-muted">
+                <span><span class="text-dim">[c]</span> clear</span>
+                <span><span class="text-dim">[q]</span> quit</span>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <div class="mt-4 space-y-1 text-sm">
-            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
-              <span class="text-[color:var(--color-muted)]">→</span>
-              <span>GET</span>
-              <span class="truncate">/</span>
-              <span class="text-[color:var(--color-ok)]">200</span>
-              <span class="text-[color:var(--color-muted)]">6ms</span>
-            </div>
-            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
-              <span class="text-[color:var(--color-muted)]">→</span>
-              <span>GET</span>
-              <span class="truncate">/@vite/client</span>
-              <span class="text-[color:var(--color-ok)]">200</span>
-              <span class="text-[color:var(--color-muted)]">3ms</span>
-            </div>
-            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
-              <span class="text-[color:var(--color-muted)]">→</span>
-              <span>GET</span>
-              <span class="truncate">/favicon.ico</span>
-              <span class="text-[color:var(--color-bad)]">404</span>
-              <span class="text-[color:var(--color-muted)]">5ms</span>
-            </div>
-            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
-              <span class="text-[color:var(--color-muted)]">→</span>
-              <span>POST</span>
-              <span class="truncate">/api/login</span>
-              <span class="text-[color:var(--color-bad)]">401</span>
-              <span class="text-[color:var(--color-muted)]">45ms</span>
-            </div>
-            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
-              <span class="text-[color:var(--color-muted)]">→</span>
-              <span>GET</span>
-              <span class="truncate">/src/App.tsx</span>
-              <span class="text-[color:var(--color-ok)]">200</span>
-              <span class="text-[color:var(--color-muted)]">2ms</span>
-            </div>
-            <div class="tui-row grid grid-cols-[1rem_3.5rem_1fr_2.5rem_3rem] items-center gap-x-3">
-              <span class="tui-chev font-bold text-[color:var(--color-accent)]">❯</span>
-              <span>GET</span>
-              <span class="truncate">/api/session</span>
-              <span class="text-[color:var(--color-ok)]">200</span>
-              <span class="text-[color:var(--color-muted)]">1ms</span>
-            </div>
+        <!-- Features: crosshair grid -->
+        <section id="features" class="scroll-mt-8 pb-24">
+          <h2 class="mb-8 font-sans text-2xl font-semibold tracking-tight text-text">
+            The pitch, in four lines.
+          </h2>
+          <div class="grid gap-px overflow-hidden rounded-lg bg-subtle sm:grid-cols-2">
+            {
+              features.map((f) => (
+                <div class="reveal bg-bg p-6 sm:p-8">
+                  <i class={`ti ${f.icon} text-xl text-accent`} aria-hidden="true" />
+                  <h3 class="mt-4 font-sans text-base font-semibold text-text">{f.title}</h3>
+                  <p class="mt-2 font-sans text-sm leading-relaxed text-muted">{f.body}</p>
+                </div>
+              ))
+            }
           </div>
+        </section>
 
-          <div class="mt-6 text-[color:var(--color-muted)]">─────────────────────────────────────────────</div>
-          <div class="mt-4 flex gap-6 text-sm text-[color:var(--color-muted)]">
-            <span><span class="text-[color:var(--color-muted)]/70">[c]</span> clear</span>
-            <span><span class="text-[color:var(--color-muted)]/70">[q]</span> quit</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section id="features" class="mx-auto w-full max-w-6xl px-6 pb-24">
-      <p class="mb-8 text-xs uppercase tracking-[0.2em] text-[color:var(--color-accent)]">
-        ── the pitch, in four lines
-      </p>
-      <div class="grid gap-6 sm:grid-cols-2">
-        {
-          features.map((f) => (
-            <div class="reveal rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] p-6 transition hover:border-[color:var(--color-accent)]/40">
-              <h3 class="mb-3 text-base font-semibold text-[color:var(--color-accent)]">
-                {f.title}
-              </h3>
-              <p class="text-sm leading-relaxed text-[color:var(--color-muted)]">{f.body}</p>
-            </div>
-          ))
-        }
-      </div>
-    </section>
-
-    <!-- Install & Run -->
-    <section id="install" class="mx-auto w-full max-w-6xl px-6 pb-24">
-      <p class="mb-8 text-xs uppercase tracking-[0.2em] text-[color:var(--color-accent)]">
-        ── two commands, then you're done
-      </p>
-      <div class="space-y-6">
-        <div>
-          <p class="mb-2 text-sm text-[color:var(--color-muted)]">
-            1. Once, ever: get mkcert and trust its local CA.
-          </p>
-          <pre
-            class="overflow-x-auto rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:var(--color-text)]"><code>brew install mkcert
+        <!-- Install: vertical timeline -->
+        <section id="install" class="scroll-mt-8 pb-24">
+          <h2 class="mb-10 font-sans text-2xl font-semibold tracking-tight text-text">
+            Two commands, then you're done.
+          </h2>
+          <ol class="space-y-10 border-l border-subtle pl-8">
+            <li class="reveal relative">
+              <span
+                class="absolute -left-11 flex h-6 w-6 items-center justify-center rounded-full border border-subtle bg-bg font-mono text-xs text-muted"
+                aria-hidden="true">1</span
+              >
+              <p class="font-sans text-sm text-muted">Once, ever: get mkcert and trust its local CA.</p>
+              <pre
+                class="mt-3 overflow-x-auto rounded-md border-l-2 border-accent bg-surface px-4 py-3 font-mono text-sm text-text"><code>brew install mkcert
 mkcert -install</code></pre>
-        </div>
-        <div>
-          <p class="mb-2 text-sm text-[color:var(--color-muted)]">2. Grab httpsdev.</p>
-          <pre
-            class="overflow-x-auto rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:var(--color-text)]"><code>go install github.com/ArpitRajputGithub/httpsdev@latest</code></pre>
-          <p class="mt-2 text-xs text-[color:var(--color-muted)]">
-            Or grab a prebuilt binary from
-            <a
-              href={`${repo}/releases`}
-              class="text-[color:var(--color-text)] underline decoration-[color:var(--color-subtle)] hover:decoration-[color:var(--color-accent)]"
-              >releases</a
-            >.
-          </p>
-        </div>
-        <div>
-          <p class="mb-2 text-sm text-[color:var(--color-muted)]">
-            3. Point it at a port. Open the browser.
-          </p>
-          <pre
-            class="overflow-x-auto rounded-lg border border-[color:var(--color-subtle)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:var(--color-text)]"><code># in one terminal
-npm run dev            <span class="text-[color:var(--color-muted)]"># or vite, next dev, rails s, python -m http.server 5173, …</span>
+            </li>
+            <li class="reveal relative">
+              <span
+                class="absolute -left-11 flex h-6 w-6 items-center justify-center rounded-full border border-subtle bg-bg font-mono text-xs text-muted"
+                aria-hidden="true">2</span
+              >
+              <p class="font-sans text-sm text-muted">Grab httpsdev.</p>
+              <pre
+                class="mt-3 overflow-x-auto rounded-md border-l-2 border-accent bg-surface px-4 py-3 font-mono text-sm text-text"><code>go install github.com/ArpitRajputGithub/httpsdev@latest</code></pre>
+              <p class="mt-2 font-sans text-xs text-muted">
+                Or grab a prebuilt binary from
+                <a
+                  href={`${repo}/releases`}
+                  class="text-text underline decoration-subtle underline-offset-2 hover:decoration-accent"
+                  >releases</a
+                >.
+              </p>
+            </li>
+            <li class="reveal relative">
+              <span
+                class="absolute -left-11 flex h-6 w-6 items-center justify-center rounded-full border border-subtle bg-bg font-mono text-xs text-muted"
+                aria-hidden="true">3</span
+              >
+              <p class="font-sans text-sm text-muted">Point it at a port. Open the browser.</p>
+              <pre
+                class="mt-3 overflow-x-auto rounded-md border-l-2 border-accent bg-surface px-4 py-3 font-mono text-sm text-text"><code># in one terminal
+npm run dev            <span class="text-dim"># or vite, next dev, rails s, python -m http.server 5173, …</span>
 
 # in another
-httpsdev 5173          <span class="text-[color:var(--color-muted)]"># https://localhost:3443  →  http://localhost:5173</span></code></pre>
-        </div>
-      </div>
-    </section>
+httpsdev 5173          <span class="text-dim"># https://localhost:3443  →  http://localhost:5173</span></code></pre>
+            </li>
+          </ol>
+        </section>
 
-    <!-- CTA -->
-    <section class="mx-auto w-full max-w-6xl px-6 pb-24 text-center">
-      <a
-        href={repo}
-        class="inline-flex items-center gap-3 rounded-lg border border-[color:var(--color-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--color-accent)] transition hover:bg-[color:var(--color-accent)] hover:text-[color:var(--color-bg)]"
-      >
-        <span>Star on GitHub</span>
-        <span aria-hidden="true">★</span>
-      </a>
-    </section>
+        <!-- CTA -->
+        <section class="pb-24">
+          <a
+            href={repo}
+            class="inline-flex items-center gap-2.5 rounded-md border border-subtle bg-surface px-6 py-3 font-sans text-sm font-semibold text-text transition hover:border-accent hover:text-accent"
+          >
+            <span>Star on GitHub</span>
+            <span aria-hidden="true">★</span>
+          </a>
+        </section>
 
-    <!-- Footer -->
-    <footer
-      class="mx-auto w-full max-w-6xl border-t border-[color:var(--color-subtle)] px-6 py-8 text-xs text-[color:var(--color-muted)]"
-    >
-      <div class="flex flex-col items-center justify-between gap-2 sm:flex-row">
-        <p>MIT · Go + bubbletea · by <a href="https://arpitrajput.xyz" class="hover:text-[color:var(--color-text)] underline decoration-[color:var(--color-subtle)] hover:decoration-[color:var(--color-accent)]">Arpit Rajput</a>.</p>
-        <div class="flex gap-6">
-          <a href={repo} class="hover:text-[color:var(--color-text)]">github</a>
-          <a href={`${repo}/releases`} class="hover:text-[color:var(--color-text)]">releases</a>
-          <a href={`${repo}/issues`} class="hover:text-[color:var(--color-text)]">issues</a>
-        </div>
-      </div>
-    </footer>
+        <!-- Footer -->
+        <footer class="border-t border-subtle py-8 font-sans text-xs text-muted">
+          <div class="flex flex-col justify-between gap-2 sm:flex-row">
+            <p>
+              MIT · Go + bubbletea · by
+              <a
+                href="https://arpitrajput.xyz"
+                class="underline decoration-subtle underline-offset-2 hover:text-text"
+                >Arpit Rajput</a
+              >.
+            </p>
+            <div class="flex gap-6">
+              <a href={repo} class="hover:text-text">github</a>
+              <a href={`${repo}/releases`} class="hover:text-text">releases</a>
+              <a href={`${repo}/issues`} class="hover:text-text">issues</a>
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
 
     <script is:inline>
+      document.documentElement.classList.add("js");
+
       // Copy button
       const btn = document.getElementById("copy-btn");
       if (btn) {
+        const icon = btn.querySelector("i");
         btn.addEventListener("click", async () => {
           const cmd = btn.getAttribute("data-copy") || "";
           try {
             await navigator.clipboard.writeText(cmd);
-            const prev = btn.textContent;
-            btn.textContent = "copied ✓";
-            btn.classList.add("text-[color:var(--color-ok)]");
-            setTimeout(() => {
-              btn.textContent = prev;
-              btn.classList.remove("text-[color:var(--color-ok)]");
-            }, 1500);
+            if (icon) {
+              icon.classList.remove("ti-clipboard-copy");
+              icon.classList.add("ti-check");
+              btn.classList.add("text-ok");
+              setTimeout(() => {
+                icon.classList.add("ti-clipboard-copy");
+                icon.classList.remove("ti-check");
+                btn.classList.remove("text-ok");
+              }, 1500);
+            }
           } catch (e) {
-            btn.textContent = "err";
+            if (icon) {
+              icon.classList.remove("ti-clipboard-copy");
+              icon.classList.add("ti-clipboard-x");
+              setTimeout(() => {
+                icon.classList.add("ti-clipboard-copy");
+                icon.classList.remove("ti-clipboard-x");
+              }, 1500);
+            }
           }
         });
       }
 
-      // Fade-in on scroll
+      // Fade-in on scroll (styles gated behind .js in global.css)
       const io = new IntersectionObserver(
         (entries) => {
           for (const e of entries) {

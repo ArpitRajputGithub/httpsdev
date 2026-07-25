@@ -5,79 +5,66 @@
   --color-bg: #11111b;
   --color-surface: #181825;
   --color-text: #cdd6f4;
-  --color-muted: #6c7086;
+  --color-muted: #9399b2; /* overlay1 — AA on dark for small text */
+  --color-dim: #6c7086; /* overlay0 — tertiary/meta only */
   --color-subtle: #45475a;
   --color-accent: #cba6f7;
   --color-ok: #a6e3a1;
   --color-warn: #fab387;
   --color-bad: #f38ba8;
 
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-html {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  font-feature-settings: "ss01", "cv02";
-}
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
 
-body {
-  min-height: 100vh;
-}
+  body {
+    min-height: 100vh;
+  }
 
-::selection {
-  background: var(--color-accent);
-  color: var(--color-bg);
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  /* Single, consistent focus affordance across the page. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 }
 
 /* ── Wordmark reveal ──────────────────────────
-   Fade in + subtle glow pulse on page load. */
+   Fade + rise on page load. No glow — depth on this
+   page comes from hairlines and shadows, not halos. */
 @keyframes wordmark-in {
   from {
     opacity: 0;
     transform: translateY(6px);
-    filter: drop-shadow(0 0 0 rgba(203, 166, 247, 0));
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: drop-shadow(0 0 24px rgba(203, 166, 247, 0.25));
   }
 }
-@keyframes wordmark-pulse {
-  0%, 100% { filter: drop-shadow(0 0 24px rgba(203, 166, 247, 0.15)); }
-  50% { filter: drop-shadow(0 0 32px rgba(203, 166, 247, 0.35)); }
-}
 .wordmark-anim {
-  animation:
-    wordmark-in 900ms ease-out both,
-    wordmark-pulse 4s ease-in-out 900ms infinite;
+  animation: wordmark-in 900ms ease-out both;
 }
-
-/* ── Fake TUI streaming rows ──────────────────
-   Rows slide in one after another. */
-@keyframes row-in {
-  from { opacity: 0; transform: translateX(-8px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-.tui-row {
-  opacity: 0;
-  animation: row-in 300ms ease-out forwards;
-}
-.tui-row:nth-child(1) { animation-delay: 400ms; }
-.tui-row:nth-child(2) { animation-delay: 900ms; }
-.tui-row:nth-child(3) { animation-delay: 1500ms; }
-.tui-row:nth-child(4) { animation-delay: 2200ms; }
-.tui-row:nth-child(5) { animation-delay: 3000ms; }
-.tui-row:nth-child(6) { animation-delay: 3900ms; }
-
-/* Chevron on the newest row blinks like a live cursor. */
-@keyframes chev-blink {
-  0%, 60% { opacity: 1; }
-  61%, 100% { opacity: 0.35; }
-}
-.tui-chev { animation: chev-blink 1.1s infinite; }
 
 /* ── Terminal cursor after install command ── */
 @keyframes cursor-blink {
@@ -86,23 +73,26 @@ body {
 }
 .cursor-blink { animation: cursor-blink 1s steps(1, end) infinite; }
 
-/* ── Fade in on scroll (uses IntersectionObserver) ── */
-.reveal {
+/* ── Fade in on scroll ────────────────────────
+   Gated behind .js so content is never hidden when
+   scripts don't run (no-JS, blocked scripts, etc.). */
+.js .reveal {
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 500ms ease-out, transform 500ms ease-out;
 }
-.reveal.in {
+.js .reveal.in {
   opacity: 1;
   transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   .wordmark-anim,
-  .tui-row,
-  .tui-chev,
   .cursor-blink,
-  .reveal {
+  .js .reveal {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
